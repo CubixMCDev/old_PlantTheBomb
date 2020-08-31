@@ -5,9 +5,7 @@ import java.util.UUID;
 import fr.karamouche.plantthebomb.enums.PTBteam;
 import fr.karamouche.plantthebomb.enums.ShopItem;
 import fr.karamouche.plantthebomb.enums.Tools;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
@@ -72,6 +70,7 @@ public class PTBer {
 
 	public void addMoney(int value){
 		this.setMoney(this.getMoney() + value);
+		//RAJOUTER UNE ALERTE
 	}
 
 	public Main getMyPlugin() {
@@ -135,5 +134,64 @@ public class PTBer {
 		stuff.setLeggings(pants);
 		stuff.setChestplate(chest);
 
+	}
+	public void oneKill(){
+		this.setKills(this.getKills()+1);
+		Bukkit.getServer().getPlayer(this.getPlayerID()).playSound(Bukkit.getServer().getPlayer(this.getPlayerID()).getLocation(), Sound.GHAST_MOAN, 350, 500);
+		this.addMoney(50);
+	}
+
+	public void kill(Player killer) {
+		Game game = myPlugin.getCurrentGame();
+		Player player = Bukkit.getPlayer(this.getPlayerID());
+		if(!game.getActualRound().isFinish()) {
+			player.setGameMode(GameMode.SPECTATOR);
+			if(killer != null){
+				PTBer killerPTB = game.getPtbers().get(killer.getUniqueId());
+				Bukkit.broadcastMessage(game.getTeam(killerPTB.getTeam()).getPrefix()+killer.getName() + "§r a tué "+game.getTeam(killerPTB.getTeam()).getPrefix()+player.getName());
+				killerPTB.oneKill();
+			}
+			else
+				Bukkit.broadcastMessage(game.getTag() + game.getTeam(this.getTeam()).getPrefix()+player.getName() + ChatColor.BOLD+" est mort.");
+			Inventory loot = player.getInventory();
+			//RAJOUTER LA SUPPRESSION DE LA BOMBE
+			if(loot.contains(ShopItem.SWORD1.toItem()))
+				loot.remove(ShopItem.SWORD1.toItem());
+			if(loot.contains(ShopItem.BOW1.toItem()))
+				loot.remove(ShopItem.BOW1.toItem());
+			if(loot.contains(Tools.SHOP.toItem()))
+				loot.remove(Tools.SHOP.toItem());
+			if(loot.contains(ShopItem.ARMOR.toItem()))
+				loot.remove(ShopItem.ARMOR.toItem());
+			/*RAJOUTER LE CLEAR DE LA BOMB
+			if(loot.contains(bomb))
+				FPTB.bombDrop(player.getLocation());*/
+			ItemStack[] content =  loot.getContents();
+			for(ItemStack items : content) {
+				if(items != null)
+					player.getWorld().dropItemNaturally(player.getLocation(), items);
+			}
+			player.getInventory().clear();
+			EntityEquipment stuff = player.getEquipment();
+			stuff.setHelmet(null);
+			stuff.setChestplate(null);
+			stuff.setLeggings(null);
+			stuff.setBoots(null);
+			player.setHealth(20);
+			/*if (isTeamDead(getTeam(player)) && !isBombPlaced && !hasVictory) {
+				if(!FPTB.isBombPlaced) {
+					FPTB.victoryOp(FPTB.getTeam(player));
+				}
+				else if (FPTB.getTeam(player).equals(FPTB.antiterroriste)){
+					if(BombExplosionTimer.seconds < (35)) {
+						BombExplosionTimer.seconds = 35;
+						Bukkit.getServer().broadcastMessage(FPTB.tag+ChatColor.YELLOW+"La bombe explose dans 10 secondes");
+					}
+					else
+						System.out.println("La bombe est à "+BombExplosionTimer.seconds);
+
+				}
+			}*/
+		}
 	}
 }

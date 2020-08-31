@@ -1,10 +1,10 @@
 package fr.karamouche.plantthebomb.objects;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.sun.deploy.security.SelectableSecurityManager;
 import fr.karamouche.plantthebomb.Main;
 import fr.karamouche.plantthebomb.enums.PTBteam;
 import fr.karamouche.plantthebomb.enums.Spawns;
@@ -23,7 +23,6 @@ import org.bukkit.scoreboard.Team;
 public class Game {
 	private Statut statut;
 	private final Map<UUID, PTBer> ptbers;
-	private String timer;
 	private final String tag;
 	private int nbPlayers = 0;
 	private final int maxPlayer;
@@ -32,6 +31,8 @@ public class Game {
 	private int scoreA;
 	private final Team terroriste;
 	private final Team antiterroriste;
+	private Round actualRound;
+	private final ArrayList<Round> roundsList = new ArrayList();
 	
 	//CONSTRUCTEUR
 	public Game(Main main) {
@@ -43,11 +44,11 @@ public class Game {
 		this.myPlugin = main;
 		this.scoreA = 0;
 		this.scoreT = 0;
-		this.timer = "00:00";
 		maxPlayer = 10;
 		Scoreboard board = Bukkit.getScoreboardManager().getMainScoreboard();
 		this.terroriste = board.registerNewTeam("Terroriste");
 		this.antiterroriste = board.registerNewTeam("Antiterroriste");
+		this.actualRound = null;
 	}
 
 	public void giveLobbyItems(Player player) {
@@ -71,6 +72,9 @@ public class Game {
 
 		this.antiterroriste.setPrefix("§b");
 		this.antiterroriste.setAllowFriendlyFire(false);
+	}
+	public String getTimer(){
+		return this.getActualRound().getTimer();
 	}
 
 	public Team getTerro(){return terroriste;}
@@ -194,6 +198,7 @@ public class Game {
 			game.getAntiterro().setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
 		}
 		game.setStatut(Statut.INGAME);
+		this.actualRound = new Round(myPlugin, this);
 	}
 /*
 		for(Player player : Bukkit.getOnlinePlayers()) {
@@ -215,13 +220,6 @@ public class Game {
 		}
 	}
 */
-	public String getTimer() {
-		return timer;
-	}
-
-	public void setTimer(String timer) {
-		this.timer = timer;
-	}
 
 	public int getNbPlayers() {
 		return nbPlayers;
@@ -241,5 +239,17 @@ public class Game {
 
 	public void createPlayer(Player player, PTBteam team){
 		new PTBer(player.getUniqueId(), team, myPlugin);
+	}
+
+	public ArrayList<Round> getRoundsList() {
+		return roundsList;
+	}
+
+	public Round getActualRound() {
+		return actualRound;
+	}
+
+	public void setActualRound(Round actualRound) {
+		this.actualRound = actualRound;
 	}
 }

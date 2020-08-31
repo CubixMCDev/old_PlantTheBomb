@@ -25,8 +25,11 @@ public class GuiManager implements Listener {
         Player player = (Player) event.getWhoClicked();
         Inventory inv = event.getInventory();
         ItemStack current = event.getCurrentItem();
-
-        if(event.getCurrentItem().getType().equals(Material.AIR)) return;
+        try{
+            if(event.getCurrentItem().getType().equals(Material.AIR)) return;
+        }catch (java.lang.NullPointerException e){
+            return;
+        }
 
         main.getRegisteredMenus().values().stream()
                 .filter(menu -> inv.getName().equalsIgnoreCase(menu.name()))

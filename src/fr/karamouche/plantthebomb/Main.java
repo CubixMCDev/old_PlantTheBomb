@@ -9,6 +9,8 @@ import fr.karamouche.plantthebomb.commands.ForcestartCommand;
 import fr.karamouche.plantthebomb.gui.GuiBuilder;
 import fr.karamouche.plantthebomb.gui.GuiManager;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.karamouche.plantthebomb.objects.Game;
@@ -79,5 +81,11 @@ public class Main extends JavaPlugin {
     public ScheduledExecutorService getScheduledExecutorService() {
         return scheduledExecutorService;
     }
+
+	public Map<Entity, Player> ArrowMap = new HashMap<Entity, Player>();
+
+	public Map<Entity, Player> getArrowMap(){
+		return ArrowMap;
+	}
 	
 }

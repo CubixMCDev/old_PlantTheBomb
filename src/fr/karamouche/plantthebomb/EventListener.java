@@ -6,25 +6,27 @@ import fr.karamouche.plantthebomb.objects.Game;
 import fr.karamouche.plantthebomb.objects.PTBer;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 
 import fr.karamouche.plantthebomb.enums.Spawns;
 import fr.karamouche.plantthebomb.enums.Statut;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class EventListener implements Listener {
 
@@ -77,17 +79,62 @@ public class EventListener implements Listener {
 	}
 
 	@EventHandler
-	public void onDamage(EntityDamageEvent e){
-		EntityDamageEvent.DamageCause cause = e.getCause();
-		if(cause.equals(EntityDamageEvent.DamageCause.FALL))
-			e.setCancelled(true);
+	public void onDamage(EntityDamageEvent event){
+		Game game = myPlugin.getCurrentGame();
+		if(game.getStatut().equals(Statut.LOBBY) || game.getStatut().equals(Statut.ENDGAME) || game.getStatut().equals(Statut.STARTING))
+			event.setCancelled(true);
+		else{
+			if(event.getEntity() instanceof Player) {
+				Player victim = (Player) event.getEntity();
+				double damage = event.getDamage();
+				if(victim.getHealth() - damage <= 0) {
+					event.setCancelled(true);
+					PTBer ptber = game.getPtbers().get(victim.getUniqueId());
+					ptber.kill(null);
+				}
+			}
+		}
+	}
+
+
+	@EventHandler
+	public void onDamageBySomeone(EntityDamageByEntityEvent event){
+		Game game = myPlugin.getCurrentGame();
+		if(game.getStatut().equals(Statut.LOBBY) || game.getStatut().equals(Statut.STARTING)){
+			event.setCancelled(true);
+		}
+		else {
+			Entity damagerE = event.getDamager();
+			Entity victimE = event.getEntity();
+			if (victimE instanceof Player && damagerE.getType() == EntityType.ARROW) {
+				if (getArrowMap().containsKey(damagerE)) {
+					damagerE = getArrowMap().get(damagerE);
+					getArrowMap().remove(damagerE);
+				}
+			}
+			if (damagerE instanceof Player && victimE instanceof Player) {
+				Player damager = (Player) damagerE;
+				Player victim = (Player) victimE;
+				if (victim.getHealth() - event.getDamage() <= 0) {
+					event.setCancelled(true);
+					game.getPtbers().get(victim.getUniqueId()).kill(damager);
+				}
+			}
+		}
+	}
+
+	public Map<Entity, Player> ArrowMap = new HashMap<>();
+
+	public Map<Entity, Player> getArrowMap(){
+		return ArrowMap;
 	}
 
 	@EventHandler
-	public void onDamageBySomeone(EntityDamageByEntityEvent e){
-		Game game = myPlugin.getCurrentGame();
-		if(game.getStatut().equals(Statut.LOBBY) || game.getStatut().equals(Statut.STARTING)){
-			e.setCancelled(true);
+	public void onFire (EntityShootBowEvent event) {
+		Entity entity = event.getEntity();
+		if(entity instanceof Player) {
+			Entity arrow = event.getProjectile();
+			getArrowMap().put(arrow, (Player) entity);
 		}
 	}
 
@@ -169,6 +216,34 @@ public class EventListener implements Listener {
 					player.playSound(player.getLocation(), Sound.VILLAGER_NO, 1, 1);
 				}
 			}
+		}
+	}
+
+	@EventHandler
+	public void onMove(PlayerMoveEvent event) {
+		Player player = event.getPlayer();
+		Game game = myPlugin.getCurrentGame();
+		if (game.getStatut().equals(Statut.INGAME) && !game.getActualRound().isCanMoove() && !event.getPlayer().getGameMode().equals(GameMode.SPECTATOR)) {
+			Location place = player.getLocation();
+			PTBer ptber = game.getPtbers().get(player.getUniqueId());
+			if (ptber.getTeam().equals(PTBteam.TERRORISTE) && place.distance(Spawns.TERRO.toLocation()) > 5) {
+				player.teleport(Spawns.TERRO.toLocation());
+				player.sendMessage(game.getTag() + ChatColor.RED + "La partie n'a pas commencée");
+				player.playSound(event.getPlayer().getLocation(), Sound.VILLAGER_NO, 1, 1);
+			}
+			if (ptber.getTeam().equals(PTBteam.ANTITERRORISTE) && place.distance(Spawns.ATERRO.toLocation()) > 5) {
+				player.teleport(Spawns.ATERRO.toLocation());
+				player.sendMessage(game.getTag() + ChatColor.RED + "La partie n'a pas commencée");
+				player.playSound(event.getPlayer().getLocation(), Sound.VILLAGER_NO, 1, 1);
+			}
+		}
+	}
+
+	@EventHandler
+	public void onArrowHit(ProjectileHitEvent event){
+		if(event.getEntity() instanceof Arrow){
+			Arrow arrow = (Arrow) event.getEntity();
+			arrow.remove();
 		}
 	}
 }
