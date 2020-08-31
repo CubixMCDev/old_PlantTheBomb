@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import com.sun.deploy.security.SelectableSecurityManager;
 import fr.karamouche.plantthebomb.Main;
 import fr.karamouche.plantthebomb.enums.PTBteam;
+import fr.karamouche.plantthebomb.enums.Spawns;
 import fr.karamouche.plantthebomb.enums.Statut;
 import fr.karamouche.plantthebomb.enums.Tools;
 import org.bukkit.Bukkit;
@@ -143,12 +145,12 @@ public class Game {
 						for(Player player : Bukkit.getOnlinePlayers()) {
 							player.sendTitle("§6 Preparez vous... ", "§eLa partie va commencer");
 							player.playSound(player.getLocation(), Sound.NOTE_PLING, 256, 1);}}
-					else if(timeB<6 && timeB != 0) {
+					else if(timeB < 6 && timeB != 0) {
 						for(Player player : Bukkit.getOnlinePlayers()) {
 							player.sendTitle("§a"+timeB, "§eLa partie va commencer");
 							player.playSound(player.getLocation(), Sound.NOTE_PLING, 256, 1);}}
 
-					else if (timeB==0) {
+					else if (timeB == 0) {
 						for (Player player : Bukkit.getOnlinePlayers()) {
 							player.sendTitle("§bC'est parti !", "");
 							player.playSound(player.getLocation(), Sound.CAT_MEOW, 256, 1000);
@@ -166,10 +168,49 @@ public class Game {
 		timer.runTaskTimer(myPlugin, 0, 20);
 	}
 
-	public void start(){
-
+	public void start() {
+		Game game = myPlugin.getCurrentGame();
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			PTBer ptber;
+			if (!game.getPtbers().containsKey(player.getUniqueId())) {
+				if (game.getTeam(PTBteam.ANTITERRORISTE).getEntries().size() < game.getTeam(PTBteam.TERRORISTE).getEntries().size()) {
+					ptber = new PTBer(player.getUniqueId(), PTBteam.ANTITERRORISTE, myPlugin);
+				} else {
+					ptber = new PTBer(player.getUniqueId(), PTBteam.TERRORISTE, myPlugin);
+				}
+			} else
+				ptber = game.getPtbers().get(player.getUniqueId());
+			PTBteam team = ptber.getTeam();
+			if (team.equals(PTBteam.ANTITERRORISTE)) {
+				player.teleport(Spawns.ATERRO.toLocation());
+			} else {
+				player.teleport(Spawns.TERRO.toLocation());
+			}
+			player.getInventory().clear();
+			ptber.giveBasicStuff();
+		}
+		game.setStatut(Statut.INGAME);
 	}
-
+/*
+		for(Player player : Bukkit.getOnlinePlayers()) {
+			addMoney(player, 100);
+			EventListener.boards.get(player).setLine(5, "§fFrags : §d"+ player.getStatistic(Statistic.PLAYER_KILLS));
+			player.getInventory().clear();
+			if(!hasTeam(player)) {
+				spectator.addPlayer(player);
+				player.setGameMode(GameMode.SPECTATOR);
+			}
+			else {
+				player.setGameMode(GameMode.SURVIVAL);
+				classicInventory(player);
+			}
+			for(Entity element : Bukkit.getWorld("CSGO").getEntities()) {
+				if (element.getType().equals(org.bukkit.entity.EntityType.DROPPED_ITEM))
+					element.remove();
+			}
+		}
+	}
+*/
 	public String getTimer() {
 		return timer;
 	}

@@ -54,9 +54,14 @@ public class EventListener implements Listener {
 	@EventHandler
 	public void onQuit(PlayerQuitEvent event) {
 		myPlugin.getScoreboardManager().onLogout(event.getPlayer());
+		Game game = myPlugin.getCurrentGame();
+		Player player = event.getPlayer();
 		if(myPlugin.getCurrentGame().getStatut().equals(Statut.LOBBY) || myPlugin.getCurrentGame().getStatut().equals(Statut.STARTING)) {
 			myPlugin.getCurrentGame().removePlayer();
 			event.setQuitMessage(myPlugin.getCurrentGame().getTag()+ChatColor.YELLOW+event.getPlayer().getName()+ChatColor.GRAY+" a quitté la partie "+ChatColor.YELLOW+"["+(myPlugin.getCurrentGame().getNbPlayers())+"/"+myPlugin.getCurrentGame().getMaxPlayer()+"]");
+			if(game.getPtbers().containsKey(player.getUniqueId())){
+				game.getPtbers().get(player.getUniqueId()).destroy();
+			}
 		}
 	}
 
@@ -139,7 +144,7 @@ public class EventListener implements Listener {
 				}else{
 					ptber = new PTBer(player.getUniqueId(), PTBteam.ANTITERRORISTE, myPlugin);
 				}
-				player.sendMessage(FPTB.tag+"§bVous avez rejoint les antiterroristes");
+				player.sendMessage(game.getTag()+"§bVous avez rejoint les antiterroristes");
 				player.playSound(player.getLocation(), Sound.NOTE_BASS_GUITAR, 1, 1);
 			}
 		}

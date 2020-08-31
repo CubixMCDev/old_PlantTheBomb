@@ -1,19 +1,25 @@
 package fr.karamouche.plantthebomb.enums;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.Collections;
+
 public enum Tools {
-    TERROJOIN(Material.REDSTONE_TORCH_ON, "§cTerroriste"),
-    ANTITERROJOIN(Material.SHEARS, "§bAntiterroriste");
+    TERROJOIN(Material.REDSTONE_TORCH_ON, "§cTerroriste", ChatColor.GRAY+"Ton but est de planter la bombe !"),
+    ANTITERROJOIN(Material.SHEARS, "§bAntiterroriste", ChatColor.GRAY+"Ton but est de désamorcer la bombe !"),
+    SHOP(Material.BEACON, ChatColor.GREEN+"Boutique", ChatColor.GRAY+"Pour acheter du stuff");
 
     private final Material mat;
     private final String title;
+    private final String lore;
 
-    Tools(Material mat, String title){
+    Tools(Material mat, String title, String lore){
         this.mat = mat;
         this.title = title;
+        this.lore = lore;
     }
 
     public ItemStack toItem(){
@@ -21,6 +27,7 @@ public enum Tools {
 
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(this.title);
+        itemMeta.setLore(Collections.singletonList(this.lore));
         item.setItemMeta(itemMeta);
         return item;
     }
