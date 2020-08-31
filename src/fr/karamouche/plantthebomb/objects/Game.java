@@ -5,33 +5,79 @@ import java.util.Map;
 import java.util.UUID;
 
 import fr.karamouche.plantthebomb.Main;
+import fr.karamouche.plantthebomb.enums.PTBteam;
 import fr.karamouche.plantthebomb.enums.Statut;
+import fr.karamouche.plantthebomb.enums.Tools;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 public class Game {
 	private Statut statut;
 	private final Map<UUID, PTBer> ptbers;
 	private String timer;
 	private final String tag;
-	private final int maxPlayer = 10;
 	private int nbPlayers = 0;
+	private final int maxPlayer;
 	private final Main myPlugin;
 	private int scoreT;
 	private int scoreA;
+	private final Team terroriste;
+	private final Team antiterroriste;
 	
 	//CONSTRUCTEUR
 	public Game(Main main) {
+		for(Team team : Bukkit.getServer().getScoreboardManager().getMainScoreboard().getTeams())
+			team.unregister();
 		this.setStatut(Statut.LOBBY);
-		this.ptbers = new HashMap<UUID, PTBer>();
+		this.ptbers = new HashMap<>();
 		this.tag = "§8[§eP§6T§cB§8] §r";
 		this.myPlugin = main;
 		this.scoreA = 0;
 		this.scoreT = 0;
 		this.timer = "00:00";
+		maxPlayer = 10;
+		Scoreboard board = Bukkit.getScoreboardManager().getMainScoreboard();
+		this.terroriste = board.registerNewTeam("Terroriste");
+		this.antiterroriste = board.registerNewTeam("Antiterroriste");
+	}
+
+	public void giveLobbyItems(Player player) {
+		ItemStack terroJoin = Tools.TERROJOIN.toItem();
+		ItemStack antiJoin = Tools.ANTITERROJOIN.toItem();
+		player.getInventory().clear();
+		player.getInventory().setHelmet(null);
+		player.getInventory().setChestplate(null);
+		player.getInventory().setLeggings(null);
+		player.getInventory().setBoots(null);
+
+		player.getInventory().setItem(3, terroJoin);
+		player.getInventory().setItem(5, antiJoin);
+
+		System.out.println("ON GIVE LES OBJETS A "+player.getName());
+	}
+
+	public void initializeTeams(){
+		this.terroriste.setPrefix("§c");
+		this.terroriste.setAllowFriendlyFire(false);
+
+		this.antiterroriste.setPrefix("§b");
+		this.antiterroriste.setAllowFriendlyFire(false);
+	}
+
+	public Team getTerro(){return terroriste;}
+	public Team getAntiterro(){return antiterroriste;}
+
+	public Team getTeam(PTBteam team){
+		if(team.equals(PTBteam.ANTITERRORISTE))
+			return getAntiterro();
+		else
+			return getTerro();
 	}
 
 	public Statut getStatut() {
@@ -146,5 +192,9 @@ public class Game {
 
 	public void removePlayer(){
 		this.setNbPlayers(this.getNbPlayers()-1);
+	}
+
+	public void createPlayer(Player player, PTBteam team){
+		new PTBer(player.getUniqueId(), team, myPlugin);
 	}
 }

@@ -16,7 +16,7 @@ public class PersonalScoreboard {
     private final UUID uuid;
     private final ObjectiveSign objectiveSign;
     final Date date = new Date();
-    private String currentDate = (new SimpleDateFormat("dd-MM-yyyy")).format(date).replace("-", "/");
+    private final String currentDate = (new SimpleDateFormat("dd-MM-yyyy")).format(date).replace("-", "/");
     private final Main myPlugin;
 
     PersonalScoreboard(Player player, Main main){

@@ -4,9 +4,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 public enum Spawns {
-	lobby(1072, 106, 1015, "CSGO"),
-	terro(1040, 66, 988, "CSGO"),
-	antiterro(1058, 60, 922, "CSGO");
+	LOBBY(1072, 106, 1015, "CSGO"),
+	TERRO(1040, 66, 988, "CSGO"),
+	ATERRO(1058, 60, 922, "CSGO");
 	
 	final int X;
 	final int Y;

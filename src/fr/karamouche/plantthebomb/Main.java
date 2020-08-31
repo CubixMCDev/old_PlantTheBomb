@@ -4,10 +4,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import fr.karamouche.plantthebomb.commands.ForcestartCommand;
+import fr.karamouche.plantthebomb.enums.PTBteam;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.karamouche.plantthebomb.objects.Game;
 import fr.karamouche.plantthebomb.scoreboard.ScoreboardManager;
+import org.bukkit.scoreboard.Team;
 
 public class Main extends JavaPlugin {
 	
@@ -29,12 +32,15 @@ public class Main extends JavaPlugin {
 	     getServer().getPluginManager().registerEvents(new EventListener(this), this);
 	     getCommand("forcestart").setExecutor(new ForcestartCommand(this));
 	     game = new Game(this);
+	     game.initializeTeams();
 	}
 	
 	@Override
 	public void onDisable() {
 		System.out.println("PTB OFF");
 		this.getScoreboardManager().onDisable();
+		for(Team team :Bukkit.getScoreboardManager().getMainScoreboard().getTeams())
+			team.unregister();
 	}
 
 	
