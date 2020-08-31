@@ -16,6 +16,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
@@ -188,6 +189,9 @@ public class Game {
 			}
 			player.getInventory().clear();
 			ptber.giveBasicStuff();
+			ptber.addMoney(100);
+			game.getTerro().setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
+			game.getAntiterro().setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
 		}
 		game.setStatut(Statut.INGAME);
 	}

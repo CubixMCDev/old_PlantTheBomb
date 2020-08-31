@@ -67,6 +67,11 @@ public class PTBer {
 
 	public void setMoney(int money) {
 		this.money = money;
+		Bukkit.getServer().getPlayer(this.getPlayerID()).setLevel(money);
+	}
+
+	public void addMoney(int value){
+		this.setMoney(this.getMoney() + value);
 	}
 
 	public Main getMyPlugin() {

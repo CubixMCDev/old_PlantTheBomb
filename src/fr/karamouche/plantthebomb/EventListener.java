@@ -96,7 +96,8 @@ public class EventListener implements Listener {
 		Game game = myPlugin.getCurrentGame();
 		if(game.getStatut().equals(Statut.LOBBY) || game.getStatut().equals(Statut.STARTING)){
 			event.setCancelled(true);
-		}
+		}else if(event.getItemDrop().getItemStack().isSimilar(Tools.SHOP.toItem()))
+			event.setCancelled(true);
 	}
 	@EventHandler
 	public void onPlaceBlock(BlockPlaceEvent event){
@@ -113,6 +114,15 @@ public class EventListener implements Listener {
 		if(game.getStatut().equals(Statut.LOBBY) || game.getStatut().equals(Statut.STARTING)){
 			if(!event.getWhoClicked().isOp() || !event.getWhoClicked().getGameMode().equals(GameMode.CREATIVE))
 				event.setCancelled(true);
+		}else{
+			ItemStack item = event.getCurrentItem();
+			if(item.isSimilar(Tools.SHOP.toItem()) && event.getWhoClicked() instanceof Player){
+				Player player = (Player) event.getWhoClicked();
+				myPlugin.getGuiManager().open(player, Shop.class);
+				event.setCancelled(true);
+			}
+			else if(event.getSlot() == 36 || event.getSlot() ==37 || event.getSlot() ==38 || event.getSlot() ==39)
+				event.setCancelled(true);
 		}
 	}
 
@@ -125,27 +135,39 @@ public class EventListener implements Listener {
 			if(itemInHand.isSimilar(Tools.TERROJOIN.toItem())) {
 				PTBer ptber;
 				event.setCancelled(true);
-				if(game.getPtbers().containsKey(player.getUniqueId())){
-					ptber = game.getPtbers().get(player.getUniqueId());
-					ptber.setTeam(PTBteam.TERRORISTE);
-				}else{
-					ptber = new PTBer(player.getUniqueId(), PTBteam.TERRORISTE, myPlugin);
+				if(game.getTerro().getEntries().size() < 5) {
+					if (game.getPtbers().containsKey(player.getUniqueId())) {
+						ptber = game.getPtbers().get(player.getUniqueId());
+						ptber.setTeam(PTBteam.TERRORISTE);
+					} else {
+						ptber = new PTBer(player.getUniqueId(), PTBteam.TERRORISTE, myPlugin);
+					}
+					player.sendMessage(game.getTag() + "§cVous avez rejoint les terroristes");
+					player.playSound(player.getLocation(), Sound.NOTE_BASS_GUITAR, 1, 1);
 				}
-				player.sendMessage(game.getTag()+"§cVous avez rejoint les terroristes");
-				player.playSound(player.getLocation(), Sound.NOTE_BASS_GUITAR, 1, 1);
+				else {
+					player.sendMessage(game.getTag() + ChatColor.RED + "L'équipe est complète !");
+					player.playSound(player.getLocation(), Sound.VILLAGER_NO, 1, 1);
+				}
 			}
 
 			else if(itemInHand.isSimilar(Tools.ANTITERROJOIN.toItem())) {
 				PTBer ptber;
 				event.setCancelled(true);
-				if(game.getPtbers().containsKey(player.getUniqueId())){
-					ptber = game.getPtbers().get(player.getUniqueId());
-					ptber.setTeam(PTBteam.ANTITERRORISTE);
-				}else{
-					ptber = new PTBer(player.getUniqueId(), PTBteam.ANTITERRORISTE, myPlugin);
+				if (game.getAntiterro().getEntries().size() < 5) {
+					if (game.getPtbers().containsKey(player.getUniqueId())) {
+						ptber = game.getPtbers().get(player.getUniqueId());
+						ptber.setTeam(PTBteam.ANTITERRORISTE);
+					} else {
+						ptber = new PTBer(player.getUniqueId(), PTBteam.ANTITERRORISTE, myPlugin);
+					}
+					player.sendMessage(game.getTag() + "§bVous avez rejoint les antiterroristes");
+					player.playSound(player.getLocation(), Sound.NOTE_BASS_GUITAR, 1, 1);
 				}
-				player.sendMessage(game.getTag()+"§bVous avez rejoint les antiterroristes");
-				player.playSound(player.getLocation(), Sound.NOTE_BASS_GUITAR, 1, 1);
+				else {
+					player.sendMessage(game.getTag() + ChatColor.RED + "L'équipe est complète !");
+					player.playSound(player.getLocation(), Sound.VILLAGER_NO, 1, 1);
+				}
 			}
 		}
 	}

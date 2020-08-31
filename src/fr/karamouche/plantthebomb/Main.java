@@ -1,10 +1,13 @@
 package fr.karamouche.plantthebomb;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import fr.karamouche.plantthebomb.commands.ForcestartCommand;
-import fr.karamouche.plantthebomb.enums.PTBteam;
+import fr.karamouche.plantthebomb.gui.GuiBuilder;
+import fr.karamouche.plantthebomb.gui.GuiManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -20,11 +23,15 @@ public class Main extends JavaPlugin {
     private ScoreboardManager sc;
     private ScheduledExecutorService executorMonoThread;
     private ScheduledExecutorService scheduledExecutorService;
+	private GuiManager guiManager;
+	private Map<Class<? extends GuiBuilder>, GuiBuilder> registeredMenus;
     private Game game;
 	
 	@Override
 	public void onEnable() {
 		System.out.println("PTB ON");
+		//GUI
+		loadGui();
 		//SCOREBOARD
 		 scheduledExecutorService = Executors.newScheduledThreadPool(16);
 	     executorMonoThread = Executors.newScheduledThreadPool(1);
@@ -42,12 +49,24 @@ public class Main extends JavaPlugin {
 		for(Team team :Bukkit.getScoreboardManager().getMainScoreboard().getTeams())
 			team.unregister();
 	}
+	public Map<Class<? extends GuiBuilder>, GuiBuilder> getRegisteredMenus() {
+		return registeredMenus;
+	}
 
+	private void loadGui(){
+		guiManager = new GuiManager(this);
+		Bukkit.getPluginManager().registerEvents(guiManager, this);
+		registeredMenus = new HashMap<>();
+		guiManager.addMenu(new Shop(this));
+	}
+
+	public GuiManager getGuiManager() {
+		return guiManager;
+	}
 	
 	public Game getCurrentGame() {
 		return this.game;
 	}
-	
 	
     public ScoreboardManager getScoreboardManager() {
         return sc;
