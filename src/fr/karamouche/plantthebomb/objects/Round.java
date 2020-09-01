@@ -2,8 +2,12 @@ package fr.karamouche.plantthebomb.objects;
 
 import fr.karamouche.plantthebomb.Main;
 import fr.karamouche.plantthebomb.enums.PTBteam;
+import fr.karamouche.plantthebomb.enums.Spawns;
 import fr.karamouche.plantthebomb.enums.Tools;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -29,12 +33,29 @@ public class Round {
             if (element.getType().equals(org.bukkit.entity.EntityType.DROPPED_ITEM))
                 element.remove();
         }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            PTBer ptber = myPlugin.getCurrentGame().getPtbers().get(player.getUniqueId());
+            PTBteam team = ptber.getTeam();
+            if (team.equals(PTBteam.ANTITERRORISTE)) {
+                player.teleport(Spawns.ATERRO.toLocation());
+            } else {
+                player.teleport(Spawns.TERRO.toLocation());
+            }
+            if(player.getGameMode().equals(GameMode.SPECTATOR)){
+                player.getInventory().clear();
+                ptber.giveBasicStuff();
+            }else
+                ptber.clearStuff();
+                //CLEAR LE STUFF EN TROP DES JOUEURS PAS MORT AVEC UN ELSE
+            player.setGameMode(GameMode.SURVIVAL);
+            ptber.addMoney(100);
+        }
     }
 
     public String getTimer() {
         return timer;
     }
-
+    //RAJOUTER L'ETAT DE JEU A LA PLACE DU TIMER
     public void startTimer(){
         Round round = this;
         BukkitRunnable runnable = new BukkitRunnable() {
@@ -55,6 +76,9 @@ public class Round {
                     }
                     Bukkit.getServer().broadcastMessage(myPlugin.getCurrentGame().getTag()+"Vous pouvez maintenant bouger !");
                 }
+                if(m==3 && s==0){
+                    game.getActualRound().winner(PTBteam.ANTITERRORISTE);
+                }
                 //FORMAT
                 String sFormat = "";
                 String mFormat = "";
@@ -67,8 +91,38 @@ public class Round {
                 s++;
             }
         };
-        runnable.runTaskTimerAsynchronously(myPlugin, 0, 20);
+        runnable.runTaskTimer(myPlugin, 0, 20);
         this.runnable = runnable;
+    }
+
+    public void winner(PTBteam team){
+        this.stop();
+        Game game = myPlugin.getCurrentGame();
+        if(team.equals(PTBteam.TERRORISTE)){
+            game.setScoreT(game.getScoreT()+1);
+            Bukkit.getServer().broadcastMessage(game.getTag()+ChatColor.YELLOW+"Les "+game.getTerro().getPrefix()+"terroristes"+ChatColor.YELLOW+" remportent le round !");
+        }else if(team.equals(PTBteam.ANTITERRORISTE)){
+            game.setScoreA(game.getScoreA()+1);
+            Bukkit.getServer().broadcastMessage(game.getTag()+ ChatColor.YELLOW+"Les "+game.getAntiterro().getPrefix()+"antiterroristes"+ChatColor.YELLOW+" remportent le round !");
+        }
+        for(PTBer ptber : game.getPtbers().values()){
+            Player player = Bukkit.getPlayer(ptber.getPlayerID());
+            if(ptber.getTeam().equals(team)){
+                ptber.addMoney(250);
+                player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1, 1);
+            }else{
+                ptber.addMoney(175);
+                player.playSound(player.getLocation(), Sound.BAT_DEATH, 1, 1);
+            }
+        }
+        BukkitRunnable runnable = new BukkitRunnable() {
+            @Override
+            public void run() {
+                game.getRoundsList().add(game.getActualRound());
+                game.setActualRound(new Round(myPlugin, game));
+            }
+        };
+        runnable.runTaskLater(myPlugin, 20*3);
     }
 
     public void setTimer(String timer) {

@@ -144,54 +144,127 @@ public class PTBer {
 	public void kill(Player killer) {
 		Game game = myPlugin.getCurrentGame();
 		Player player = Bukkit.getPlayer(this.getPlayerID());
-		if(!game.getActualRound().isFinish()) {
-			player.setGameMode(GameMode.SPECTATOR);
-			if(killer != null){
-				PTBer killerPTB = game.getPtbers().get(killer.getUniqueId());
-				Bukkit.broadcastMessage(game.getTeam(killerPTB.getTeam()).getPrefix()+killer.getName() + "§r a tué "+game.getTeam(killerPTB.getTeam()).getPrefix()+player.getName());
-				killerPTB.oneKill();
-			}
-			else
-				Bukkit.broadcastMessage(game.getTag() + game.getTeam(this.getTeam()).getPrefix()+player.getName() + ChatColor.BOLD+" est mort.");
-			Inventory loot = player.getInventory();
-			//RAJOUTER LA SUPPRESSION DE LA BOMBE
-			if(loot.contains(ShopItem.SWORD1.toItem()))
-				loot.remove(ShopItem.SWORD1.toItem());
-			if(loot.contains(ShopItem.BOW1.toItem()))
-				loot.remove(ShopItem.BOW1.toItem());
-			if(loot.contains(Tools.SHOP.toItem()))
-				loot.remove(Tools.SHOP.toItem());
-			if(loot.contains(ShopItem.ARMOR.toItem()))
-				loot.remove(ShopItem.ARMOR.toItem());
-			/*RAJOUTER LE CLEAR DE LA BOMB
-			if(loot.contains(bomb))
-				FPTB.bombDrop(player.getLocation());*/
-			ItemStack[] content =  loot.getContents();
-			for(ItemStack items : content) {
-				if(items != null)
-					player.getWorld().dropItemNaturally(player.getLocation(), items);
-			}
-			player.getInventory().clear();
-			EntityEquipment stuff = player.getEquipment();
-			stuff.setHelmet(null);
-			stuff.setChestplate(null);
-			stuff.setLeggings(null);
-			stuff.setBoots(null);
-			player.setHealth(20);
-			/*if (isTeamDead(getTeam(player)) && !isBombPlaced && !hasVictory) {
-				if(!FPTB.isBombPlaced) {
-					FPTB.victoryOp(FPTB.getTeam(player));
-				}
-				else if (FPTB.getTeam(player).equals(FPTB.antiterroriste)){
-					if(BombExplosionTimer.seconds < (35)) {
-						BombExplosionTimer.seconds = 35;
-						Bukkit.getServer().broadcastMessage(FPTB.tag+ChatColor.YELLOW+"La bombe explose dans 10 secondes");
-					}
-					else
-						System.out.println("La bombe est à "+BombExplosionTimer.seconds);
-
-				}
-			}*/
+		player.setGameMode(GameMode.SPECTATOR);
+		if(killer != null){
+			PTBer killerPTB = game.getPtbers().get(killer.getUniqueId());
+			Bukkit.broadcastMessage(game.getTeam(killerPTB.getTeam()).getPrefix()+killer.getName() + "§r a tué "+game.getTeam(this.getTeam()).getPrefix()+player.getName());
+			killerPTB.oneKill();
 		}
+		else
+			Bukkit.broadcastMessage(game.getTag() + game.getTeam(this.getTeam()).getPrefix()+player.getName() + ChatColor.BOLD+" est mort.");
+		Inventory loot = player.getInventory();
+		//RAJOUTER LA SUPPRESSION DE LA BOMBE
+		if(loot.contains(ShopItem.SWORD1.toItem()))
+			loot.remove(ShopItem.SWORD1.toItem());
+		if(loot.contains(ShopItem.BOW1.toItem()))
+			loot.remove(ShopItem.BOW1.toItem());
+		if(loot.contains(Tools.SHOP.toItem()))
+			loot.remove(Tools.SHOP.toItem());
+		if(loot.contains(ShopItem.ARMOR.toItem()))
+			loot.remove(ShopItem.ARMOR.toItem());
+		/*RAJOUTER LE CLEAR DE LA BOMB
+		if(loot.contains(bomb))
+			FPTB.bombDrop(player.getLocation());*/
+		ItemStack[] content =  loot.getContents();
+		for(ItemStack items : content) {
+			if(items != null)
+				player.getWorld().dropItemNaturally(player.getLocation(), items);
+		}
+		player.getInventory().clear();
+		EntityEquipment stuff = player.getEquipment();
+		stuff.setHelmet(null);
+		stuff.setChestplate(null);
+		stuff.setLeggings(null);
+		stuff.setBoots(null);
+		player.setHealth(20);
+		Team playerTeam = myPlugin.getCurrentGame().getTeam(this.getTeam());
+		boolean isTeamDead = true;
+		for(String playerS : playerTeam.getEntries()) {
+			Player toTest = Bukkit.getServer().getPlayer(playerS);
+			if(!toTest.getGameMode().equals(GameMode.SPECTATOR))
+				isTeamDead = false;
+		}
+		if(isTeamDead && !game.getActualRound().isFinish()) {
+			PTBteam ptbteam = this.getTeam();
+			if(ptbteam.equals(PTBteam.TERRORISTE))
+				game.getActualRound().winner(PTBteam.ANTITERRORISTE);
+			else
+				game.getActualRound().winner(PTBteam.TERRORISTE);
+		}
+	}
+
+	public void clearStuff() {
+		Player player = Bukkit.getPlayer(this.getPlayerID());
+		Inventory stuff = player.getInventory();
+		ItemStack[] element = stuff.getContents();
+		int maxSword = 0;
+		int maxBow = 0;
+		int arrowAmount = 0;
+		for(ItemStack items : element) {
+			if(items != null) {
+				ShopItem item = null;
+				for(ShopItem shopItems : ShopItem.values()){
+					if(items.isSimilar(shopItems.toItem()))
+						item = shopItems;
+				if(item != null) {
+					String type = item.getCategorie();
+					int level = item.getLevel();
+					//on récupère le niveau de l'arc
+					if(type.equalsIgnoreCase("bow")) {
+						if(level > maxBow) {
+							maxBow = level;
+						}
+					}
+					//on récupère le niveau de l'épée
+					else if(type.equalsIgnoreCase("sword")) {
+						if(level > maxSword) {
+							maxSword = level;
+						}
+					}
+				}
+				//on récupère le nombre de flèches
+				if(items.getType().equals(Material.ARROW)) {
+					arrowAmount = items.getAmount();
+				}
+			}
+		}
+		stuff.clear();
+		switch(maxSword) {
+			case 2:
+				stuff.setItem(0, ShopItem.SWORD2.toItem());
+				break;
+			case 3:
+				stuff.setItem(0, ShopItem.SWORD3.toItem());
+				break;
+			case 4:
+				stuff.setItem(0, ShopItem.SWORD4.toItem());
+				break;
+			case 1:
+			default:
+				stuff.setItem(0, ShopItem.SWORD1.toItem());
+		}
+		switch(maxBow) {
+			case 2:
+				stuff.setItem(1, ShopItem.BOW2.toItem());
+				break;
+			case 3:
+				stuff.setItem(1, ShopItem.BOW3.toItem());
+				break;
+			case 4:
+				stuff.setItem(1, ShopItem.BOW4.toItem());
+				break;
+			case 1:
+			default:
+				stuff.setItem(1, ShopItem.BOW1.toItem());
+		}
+		if(arrowAmount == 0)
+			stuff.setItem(28, ShopItem.ARROW.getStack(10));
+		else if(arrowAmount >= 20)
+			stuff.setItem(28, ShopItem.ARROW.getStack(20));
+		else
+			stuff.setItem(28, ShopItem.ARROW.getStack(arrowAmount));
+		player.updateInventory();
+	}
+		stuff.setItem(13, Tools.SHOP.toItem());
 	}
 }

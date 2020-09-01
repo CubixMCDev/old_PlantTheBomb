@@ -4,10 +4,7 @@ import fr.karamouche.plantthebomb.enums.PTBteam;
 import fr.karamouche.plantthebomb.enums.Tools;
 import fr.karamouche.plantthebomb.objects.Game;
 import fr.karamouche.plantthebomb.objects.PTBer;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -23,6 +20,7 @@ import org.bukkit.event.player.*;
 
 import fr.karamouche.plantthebomb.enums.Spawns;
 import fr.karamouche.plantthebomb.enums.Statut;
+import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
@@ -86,8 +84,9 @@ public class EventListener implements Listener {
 		else{
 			if(event.getEntity() instanceof Player) {
 				Player victim = (Player) event.getEntity();
-				double damage = event.getDamage();
-				if(victim.getHealth() - damage <= 0) {
+				double damage = event.getFinalDamage();
+				EntityDamageEvent.DamageCause cause = event.getCause();
+				if(victim.getHealth() - damage <= 0 && !cause.equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK)) {
 					event.setCancelled(true);
 					PTBer ptber = game.getPtbers().get(victim.getUniqueId());
 					ptber.kill(null);
@@ -115,7 +114,7 @@ public class EventListener implements Listener {
 			if (damagerE instanceof Player && victimE instanceof Player) {
 				Player damager = (Player) damagerE;
 				Player victim = (Player) victimE;
-				if (victim.getHealth() - event.getDamage() <= 0) {
+				if (victim.getHealth() - event.getFinalDamage() <= 0) {
 					event.setCancelled(true);
 					game.getPtbers().get(victim.getUniqueId()).kill(damager);
 				}
@@ -163,13 +162,17 @@ public class EventListener implements Listener {
 				event.setCancelled(true);
 		}else{
 			ItemStack item = event.getCurrentItem();
-			if(item.isSimilar(Tools.SHOP.toItem()) && event.getWhoClicked() instanceof Player){
-				Player player = (Player) event.getWhoClicked();
-				myPlugin.getGuiManager().open(player, Shop.class);
-				event.setCancelled(true);
+			try {
+				if(item.isSimilar(Tools.SHOP.toItem()) && event.getWhoClicked() instanceof Player){
+					Player player = (Player) event.getWhoClicked();
+					myPlugin.getGuiManager().open(player, Shop.class);
+					event.setCancelled(true);
+				}
+				else if(event.getSlot() == 36 || event.getSlot() ==37 || event.getSlot() ==38 || event.getSlot() ==39)
+					event.setCancelled(true);
+			}catch (NullPointerException e){
+				return;
 			}
-			else if(event.getSlot() == 36 || event.getSlot() ==37 || event.getSlot() ==38 || event.getSlot() ==39)
-				event.setCancelled(true);
 		}
 	}
 
@@ -245,5 +248,10 @@ public class EventListener implements Listener {
 			Arrow arrow = (Arrow) event.getEntity();
 			arrow.remove();
 		}
+	}
+
+	@EventHandler
+	public void onWeather(WeatherChangeEvent event){
+		event.setCancelled(true);
 	}
 }

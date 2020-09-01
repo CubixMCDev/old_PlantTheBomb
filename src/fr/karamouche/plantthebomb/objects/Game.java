@@ -12,6 +12,7 @@ import fr.karamouche.plantthebomb.enums.Statut;
 import fr.karamouche.plantthebomb.enums.Tools;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -175,8 +176,11 @@ public class Game {
 
 	public void start() {
 		Game game = myPlugin.getCurrentGame();
+		game.setScoreA(0);
+		game.setScoreT(0);
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			PTBer ptber;
+			player.setGameMode(GameMode.SPECTATOR);
 			if (!game.getPtbers().containsKey(player.getUniqueId())) {
 				if (game.getTeam(PTBteam.ANTITERRORISTE).getEntries().size() < game.getTeam(PTBteam.TERRORISTE).getEntries().size()) {
 					ptber = new PTBer(player.getUniqueId(), PTBteam.ANTITERRORISTE, myPlugin);
@@ -185,41 +189,13 @@ public class Game {
 				}
 			} else
 				ptber = game.getPtbers().get(player.getUniqueId());
-			PTBteam team = ptber.getTeam();
-			if (team.equals(PTBteam.ANTITERRORISTE)) {
-				player.teleport(Spawns.ATERRO.toLocation());
-			} else {
-				player.teleport(Spawns.TERRO.toLocation());
-			}
 			player.getInventory().clear();
-			ptber.giveBasicStuff();
-			ptber.addMoney(100);
 			game.getTerro().setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
 			game.getAntiterro().setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
 		}
 		game.setStatut(Statut.INGAME);
 		this.actualRound = new Round(myPlugin, this);
 	}
-/*
-		for(Player player : Bukkit.getOnlinePlayers()) {
-			addMoney(player, 100);
-			EventListener.boards.get(player).setLine(5, "§fFrags : §d"+ player.getStatistic(Statistic.PLAYER_KILLS));
-			player.getInventory().clear();
-			if(!hasTeam(player)) {
-				spectator.addPlayer(player);
-				player.setGameMode(GameMode.SPECTATOR);
-			}
-			else {
-				player.setGameMode(GameMode.SURVIVAL);
-				classicInventory(player);
-			}
-			for(Entity element : Bukkit.getWorld("CSGO").getEntities()) {
-				if (element.getType().equals(org.bukkit.entity.EntityType.DROPPED_ITEM))
-					element.remove();
-			}
-		}
-	}
-*/
 
 	public int getNbPlayers() {
 		return nbPlayers;
