@@ -34,18 +34,7 @@ public class PersonalScoreboard {
         objectiveSign.setDisplayName(ChatColor.YELLOW + "§ePlant§6The§cBomb");
         objectiveSign.setLine(0, ChatColor.GRAY + currentDate);
         objectiveSign.setLine(1, "§1");
-		if(game.getStatut().equals(Statut.INGAME)) {
-            objectiveSign.setLine(2, "Score : §c" + game.getScoreT() + " §r- §b" + game.getScoreA());
-            objectiveSign.setLine(3, "Round:" + ChatColor.GOLD + " " + game.getTimer());
-            objectiveSign.setLine(4, "§2");
-            objectiveSign.setLine(5, "§fArgent : §e" + game.getPtbers().get(uuid).getMoney());
-            objectiveSign.setLine(6, "§fFrags : §d" + game.getPtbers().get(uuid).getKills());
-            for(int i = 7 ; i< 13 ; i++) {
-                objectiveSign.setLine(i, "§3");
-                objectiveSign.setLine(13, ip);
-            }
-
-        }else if (game.getStatut().equals(Statut.LOBBY) ||game.getStatut().equals(Statut.STARTING)){
+		if (game.getStatut().equals(Statut.LOBBY) ||game.getStatut().equals(Statut.STARTING)){
             objectiveSign.setLine(2, "§e§lCoins");
             objectiveSign.setLine(3, "§7" + "0" /*main.getApi().getEcoManager().getBalanceCoins(player)*/);
             objectiveSign.setLine(4, "§2");
@@ -68,6 +57,25 @@ public class PersonalScoreboard {
             objectiveSign.setLine(12, "§4");
             objectiveSign.setLine(13, "§8» " + ip);
 		}
+        else{
+            objectiveSign.setLine(2, "Score : §c" + game.getScoreT() + " §r- §b" + game.getScoreA());
+            if(game.getStatut().equals(Statut.INGAME) && !game.getActualRound().getBomb().isPlanted())
+                objectiveSign.setLine(3, "Round:" + ChatColor.RED + " " + game.getTimer());
+            else if(game.getStatut().equals(Statut.INGAME) && game.getActualRound().getBomb().isPlanted())
+                objectiveSign.setLine(3, "Bombe:" + ChatColor.GOLD + " " + game.getActualRound().getBomb().getTimer());
+            else{
+                objectiveSign.setLine(3, "Victoire: " + game.getActualRound().getWinner().toString());
+            }
+
+            objectiveSign.setLine(4, "§2");
+            objectiveSign.setLine(5, "§fArgent : §e" + game.getPtbers().get(uuid).getMoney());
+            objectiveSign.setLine(6, "§fFrags : §d" + game.getPtbers().get(uuid).getKills());
+            for(int i = 7 ; i< 13 ; i++) {
+                objectiveSign.setLine(i, "§3");
+                objectiveSign.setLine(13, ip);
+            }
+
+        }
         objectiveSign.updateLines();
     }
 

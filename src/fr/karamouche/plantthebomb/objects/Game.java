@@ -7,15 +7,13 @@ import java.util.UUID;
 
 import fr.karamouche.plantthebomb.Main;
 import fr.karamouche.plantthebomb.enums.PTBteam;
-import fr.karamouche.plantthebomb.enums.Spawns;
 import fr.karamouche.plantthebomb.enums.Statut;
 import fr.karamouche.plantthebomb.enums.Tools;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Sound;
+import org.bukkit.*;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Scoreboard;
@@ -24,6 +22,7 @@ import org.bukkit.scoreboard.Team;
 public class Game {
 	private Statut statut;
 	private final Map<UUID, PTBer> ptbers;
+	private final Map<UUID, PTBer> offlineptbers;
 	private final String tag;
 	private int nbPlayers = 0;
 	private final int maxPlayer;
@@ -41,6 +40,7 @@ public class Game {
 			team.unregister();
 		this.setStatut(Statut.LOBBY);
 		this.ptbers = new HashMap<>();
+		this.offlineptbers = new HashMap<>();
 		this.tag = "§8[§eP§6T§cB§8] §r";
 		this.myPlugin = main;
 		this.scoreA = 0;
@@ -190,11 +190,39 @@ public class Game {
 			} else
 				ptber = game.getPtbers().get(player.getUniqueId());
 			player.getInventory().clear();
+			ptber.setMoney(0);
+			ptber.setKills(0);
 			game.getTerro().setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
 			game.getAntiterro().setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
 		}
 		game.setStatut(Statut.INGAME);
 		this.actualRound = new Round(myPlugin, this);
+	}
+
+	public void endgame(PTBteam winnerTeam){
+		this.setStatut(Statut.ENDGAME);
+		if (winnerTeam.equals(PTBteam.TERRORISTE)) {
+			Team winners = this.getTerro();
+			Bukkit.getServer().broadcastMessage(this.getTag() + ChatColor.BOLD + "Victoire des " + winners.getPrefix() + "terroristes !");
+		}else {
+			Team winners = this.getAntiterro();
+			Bukkit.getServer().broadcastMessage(this.getTag()+ChatColor.BOLD+"Victoire des "+winners.getPrefix()+"antiterroristes !");
+		}
+			for(PTBer ptber : this.getPtbers().values()) {
+				Player player = Bukkit.getPlayer(ptber.getPlayerID());
+				if(ptber.getTeam().equals(winnerTeam)) {
+					player.setAllowFlight(true);
+					if(!player.getGameMode().equals(GameMode.SPECTATOR)) {
+						Firework firework = player.getWorld().spawn(player.getLocation(), Firework.class);
+						FireworkMeta data = firework.getFireworkMeta();
+						data.addEffects(FireworkEffect.builder().withColor(Color.RED).with(FireworkEffect.Type.BALL_LARGE).withFlicker().build());
+						data.setPower(1);
+						firework.setFireworkMeta(data);
+					}
+				}
+				else if(!player.getGameMode().equals(GameMode.SPECTATOR))
+					ptber.kill(null);
+			}
 	}
 
 	public int getNbPlayers() {
@@ -227,5 +255,9 @@ public class Game {
 
 	public void setActualRound(Round actualRound) {
 		this.actualRound = actualRound;
+	}
+
+	public Map<UUID, PTBer> getOfflineptbers() {
+		return offlineptbers;
 	}
 }

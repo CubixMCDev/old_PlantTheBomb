@@ -13,9 +13,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class Round {
-    private final PTBteam winner;
+    private PTBteam winner;
     private final Game game;
     private final Main myPlugin;
+    private final Bomb bomb;
     private String timer;
     private BukkitRunnable runnable;
     private boolean canMoove;
@@ -33,9 +34,9 @@ public class Round {
             if (element.getType().equals(org.bukkit.entity.EntityType.DROPPED_ITEM))
                 element.remove();
         }
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            PTBer ptber = myPlugin.getCurrentGame().getPtbers().get(player.getUniqueId());
+        for (PTBer ptber : game.getPtbers().values()) {
             PTBteam team = ptber.getTeam();
+            Player player = Bukkit.getPlayer(ptber.getPlayerID());
             if (team.equals(PTBteam.ANTITERRORISTE)) {
                 player.teleport(Spawns.ATERRO.toLocation());
             } else {
@@ -50,6 +51,7 @@ public class Round {
             player.setGameMode(GameMode.SURVIVAL);
             ptber.addMoney(100);
         }
+        this.bomb = new Bomb(myPlugin);
     }
 
     public String getTimer() {
@@ -97,13 +99,24 @@ public class Round {
 
     public void winner(PTBteam team){
         this.stop();
+        this.setWinner(team);
+        int winnerPoint = 10;
+
         Game game = myPlugin.getCurrentGame();
         if(team.equals(PTBteam.TERRORISTE)){
             game.setScoreT(game.getScoreT()+1);
             Bukkit.getServer().broadcastMessage(game.getTag()+ChatColor.YELLOW+"Les "+game.getTerro().getPrefix()+"terroristes"+ChatColor.YELLOW+" remportent le round !");
+            if(game.getScoreT() == winnerPoint){
+                game.endgame(PTBteam.TERRORISTE);
+                return;
+            }
         }else if(team.equals(PTBteam.ANTITERRORISTE)){
             game.setScoreA(game.getScoreA()+1);
             Bukkit.getServer().broadcastMessage(game.getTag()+ ChatColor.YELLOW+"Les "+game.getAntiterro().getPrefix()+"antiterroristes"+ChatColor.YELLOW+" remportent le round !");
+            if(game.getScoreA() == winnerPoint) {
+                game.endgame(PTBteam.ANTITERRORISTE);
+                return;
+            }
         }
         for(PTBer ptber : game.getPtbers().values()){
             Player player = Bukkit.getPlayer(ptber.getPlayerID());
@@ -116,13 +129,26 @@ public class Round {
             }
         }
         BukkitRunnable runnable = new BukkitRunnable() {
+            int i = 0;
+            final Round round = game.getActualRound();
             @Override
             public void run() {
-                game.getRoundsList().add(game.getActualRound());
-                game.setActualRound(new Round(myPlugin, game));
+                round.setTimer("00:0"+(5-i));
+                if(i == 5) {
+                    Bomb bomb = game.getActualRound().getBomb();
+                    bomb.remove();
+                    game.getRoundsList().add(game.getActualRound());
+                    game.setActualRound(new Round(myPlugin, game));
+                    this.cancel();
+                }
+                i++;
             }
         };
-        runnable.runTaskLater(myPlugin, 20*3);
+        runnable.runTaskTimer(myPlugin,0, 20);
+    }
+
+    private void setWinner(PTBteam team) {
+        this.winner = team;
     }
 
     public void setTimer(String timer) {
@@ -148,5 +174,13 @@ public class Round {
 
     public void setFinish(boolean stop) {
         isFinish = stop;
+    }
+
+    public PTBteam getWinner() {
+        return winner;
+    }
+
+    public Bomb getBomb() {
+        return bomb;
     }
 }

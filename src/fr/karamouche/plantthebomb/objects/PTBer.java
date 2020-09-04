@@ -147,7 +147,7 @@ public class PTBer {
 		player.setGameMode(GameMode.SPECTATOR);
 		if(killer != null){
 			PTBer killerPTB = game.getPtbers().get(killer.getUniqueId());
-			Bukkit.broadcastMessage(game.getTeam(killerPTB.getTeam()).getPrefix()+killer.getName() + "§r a tué "+game.getTeam(this.getTeam()).getPrefix()+player.getName());
+			Bukkit.broadcastMessage(game.getTag()+game.getTeam(killerPTB.getTeam()).getPrefix()+killer.getName() + "§r a tué "+game.getTeam(this.getTeam()).getPrefix()+player.getName());
 			killerPTB.oneKill();
 		}
 		else
@@ -186,9 +186,9 @@ public class PTBer {
 		}
 		if(isTeamDead && !game.getActualRound().isFinish()) {
 			PTBteam ptbteam = this.getTeam();
-			if(ptbteam.equals(PTBteam.TERRORISTE))
+			if(ptbteam.equals(PTBteam.TERRORISTE) && !game.getActualRound().getBomb().isPlanted())
 				game.getActualRound().winner(PTBteam.ANTITERRORISTE);
-			else
+			else if(ptbteam.equals(PTBteam.ANTITERRORISTE))
 				game.getActualRound().winner(PTBteam.TERRORISTE);
 		}
 	}

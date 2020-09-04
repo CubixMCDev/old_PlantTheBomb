@@ -77,7 +77,7 @@ public enum ShopItem {
             itemMeta.spigot().setUnbreakable(true);
         itemMeta.setDisplayName(this.getName());
         item.setItemMeta(itemMeta);
-        if(this.getName().equals("Arc lvl.4")){
+        if(this.equals(BOW4)){
             item.addEnchantment(Enchantment.ARROW_DAMAGE, 1);
             item.addEnchantment(Enchantment.ARROW_FIRE, 1);
             item.addEnchantment(Enchantment.ARROW_KNOCKBACK, 1);
@@ -99,7 +99,7 @@ public enum ShopItem {
         itemMeta.setDisplayName(this.getName());
         itemMeta.setLore(Collections.singletonList(ChatColor.GOLD+"Prix : "+this.getPrice()));
         item.setItemMeta(itemMeta);
-        if(this.getName().equals("Arc lvl.4")){
+        if(this.equals(BOW4)){
             item.addEnchantment(Enchantment.ARROW_DAMAGE, 1);
             item.addEnchantment(Enchantment.ARROW_FIRE, 1);
             item.addEnchantment(Enchantment.ARROW_KNOCKBACK, 1);
