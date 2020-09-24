@@ -45,7 +45,7 @@ public class Game {
 		this.myPlugin = main;
 		this.scoreA = 0;
 		this.scoreT = 0;
-		maxPlayer = 10;
+		maxPlayer = 4;
 		Scoreboard board = Bukkit.getScoreboardManager().getMainScoreboard();
 		this.terroriste = board.registerNewTeam("Terroriste");
 		this.antiterroriste = board.registerNewTeam("Antiterroriste");
@@ -235,6 +235,8 @@ public class Game {
 
 	public void addPlayer() {
 		this.setNbPlayers(this.getNbPlayers()+1);
+		if(this.getNbPlayers() == this.getMaxPlayer())
+			this.lunching();
 	}
 
 	public void removePlayer(){

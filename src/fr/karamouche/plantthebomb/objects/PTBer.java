@@ -162,9 +162,8 @@ public class PTBer {
 			loot.remove(Tools.SHOP.toItem());
 		if(loot.contains(ShopItem.ARMOR.toItem()))
 			loot.remove(ShopItem.ARMOR.toItem());
-		/*RAJOUTER LE CLEAR DE LA BOMB
-		if(loot.contains(bomb))
-			FPTB.bombDrop(player.getLocation());*/
+		if(loot.contains(Tools.BOMB.toItem()))
+			game.getActualRound().getBomb().setLoc(player.getLocation());
 		ItemStack[] content =  loot.getContents();
 		for(ItemStack items : content) {
 			if(items != null)

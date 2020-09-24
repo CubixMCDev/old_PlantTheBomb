@@ -1,0 +1,8 @@
+name: PlantTheBomb
+version: 2.0
+author: Karamouche
+main: fr.karamouche.plantthebomb.Main
+commands:
+  forcestart:
+    description: start the game
+    permission: punch.start
