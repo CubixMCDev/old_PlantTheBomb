@@ -25,7 +25,6 @@ public class BombExplosionTimer extends BukkitRunnable {
 
     @Override
     public void run() {
-        seconds ++;
         Location bombLoc = bomb.getLoc();
         if (seconds == 45) {
             if(!round.isFinish())
@@ -47,18 +46,18 @@ public class BombExplosionTimer extends BukkitRunnable {
             }
         }
         else {
+            if(!bomb.isPlanted() || bomb.isDefuze())
+                this.cancel();
             bombBlock.getWorld().playSound(bombLoc, Sound.NOTE_PLING, 2, 300);
             if(bombBlock.getType().equals(Material.REDSTONE_TORCH_ON))
                 bombBlock.setType(Material.REDSTONE_TORCH_OFF);
             else if(bombBlock.getType().equals(Material.REDSTONE_TORCH_OFF))
                 bombBlock.setType(Material.REDSTONE_TORCH_ON);
-            if(!bomb.isPlanted()) {
-                this.cancel();
-            }
         }
         if(seconds <= 35)
             bomb.setTimer("00:"+(45-seconds));
         else
             bomb.setTimer("00:0"+(45-seconds));
+        seconds ++;
     }
 }

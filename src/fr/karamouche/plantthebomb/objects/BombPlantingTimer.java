@@ -1,7 +1,6 @@
 package fr.karamouche.plantthebomb.objects;
 
 import fr.karamouche.plantthebomb.enums.Tools;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -20,9 +19,10 @@ public class BombPlantingTimer extends BukkitRunnable {
     //ON ENVOIE CES TROIS VARIABLES DP FPTB
     private final Game game;
     private final Player planter;
-    private Location planterLocation;
-    private Block bombBlock;
-    private double playerLife;
+    private final Location planterLocation;
+    private final Bomb bomb;
+    private final Block bombBlock;
+    private final double playerLife;
 
     public BombPlantingTimer(Game game, Player planter, double health, Block bomb, Location location) {
         this.game = game;
@@ -30,6 +30,7 @@ public class BombPlantingTimer extends BukkitRunnable {
         this.playerLife = health;
         this.bombBlock = bomb;
         this.planterLocation = location;
+        this.bomb = game.getActualRound().getBomb();
     }
 
     @Override
@@ -39,7 +40,7 @@ public class BombPlantingTimer extends BukkitRunnable {
         ItemStack itemHand = planter.getItemInHand();
         if(planterPose.equals(planter.getLocation().getBlock()) && itemHand.getType().equals(Material.AIR) && planter.getHealth() == playerLife && !game.getActualRound().isFinish()) {
             if(ticks == 64) {
-                game.getActualRound().getBomb().bombPlaceEvent(planter, bombBlock);
+                bomb.bombPlaceEvent(planter, bombBlock);
                 this.cancel();
             }
             else {
@@ -60,7 +61,7 @@ public class BombPlantingTimer extends BukkitRunnable {
                 planter.sendMessage(game.getTag()+ChatColor.YELLOW+"Fin du round");
             else
                 planter.sendMessage(game.getTag()+ChatColor.YELLOW+"La pose de la bombe a été annulé");
-            game.getActualRound().getBomb().setLoc(null);
+            bomb.setLoc(null);
             this.cancel();
         }
     }

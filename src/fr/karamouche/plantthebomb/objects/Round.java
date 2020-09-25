@@ -47,7 +47,6 @@ public class Round {
                 ptber.giveBasicStuff();
             }else
                 ptber.clearStuff();
-                //CLEAR LE STUFF EN TROP DES JOUEURS PAS MORT AVEC UN ELSE
             player.setGameMode(GameMode.SURVIVAL);
             ptber.addMoney(100);
         }
@@ -78,7 +77,7 @@ public class Round {
                     }
                     Bukkit.getServer().broadcastMessage(myPlugin.getCurrentGame().getTag()+"Vous pouvez maintenant bouger !");
                 }
-                if(m==3 && s==0){
+                if(m==3 && s==0 && !game.getActualRound().getBomb().isPlanted()){
                     game.getActualRound().winner(PTBteam.ANTITERRORISTE);
                 }
                 //FORMAT

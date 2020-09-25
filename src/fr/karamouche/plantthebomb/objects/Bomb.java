@@ -20,22 +20,40 @@ public class Bomb {
     private PTBer owner;
     private boolean isPlanted;
     private String timer;
+    private boolean isDefuzing;
+    private boolean isDefuze;
 
     public Bomb(Main myPlugin){
         this.myPlugin = myPlugin;
+
+        //GIVE LA BOMB
         ArrayList<PTBer> terros = new ArrayList();
+        ArrayList<PTBer> antiterros = new ArrayList();
+
+        Random rand = new Random();
         for(PTBer ptber : myPlugin.getCurrentGame().getPtbers().values()){
             if(ptber.getTeam().equals(PTBteam.TERRORISTE))
                 terros.add(ptber);
+            else if(ptber.getTeam().equals(PTBteam.ANTITERRORISTE))
+                antiterros.add(ptber);
         }
-        int size = terros.size();
-        Random rand = new Random();
-        this.owner = terros.get(rand.nextInt(size));
+        int sizet = terros.size();
+        this.owner = terros.get(rand.nextInt(sizet));
         Player player = Bukkit.getPlayer(this.owner.getPlayerID());
         player.getInventory().setItem(8, Tools.BOMB.toItem());
+
+        //GIVE LE KIT
+        int sizea = antiterros.size();
+        PTBer kitOwner = antiterros.get(rand.nextInt(sizea));
+        Player playerKit = Bukkit.getPlayer(kitOwner.getPlayerID());
+        playerKit.getInventory().setItem(8, Tools.KIT.toItem());
+
+
         this.loc = null;
         this.isPlanted = false;
         this.timer = "00:00";
+        this.isDefuzing = false;
+        this.isDefuze = false;
     }
 
     public static char getDirectionArrow(Location playerLoc, Location targetLoc) {
@@ -161,7 +179,7 @@ public class Bomb {
         this.setLoc(bombBlock.getLocation());
         PTBer ptber = game.getPtbers().get(planter.getUniqueId());
         BombExplosionTimer timer = new BombExplosionTimer(myPlugin, this);
-        Bukkit.broadcastMessage(game.getTag() + ChatColor.YELLOW+"Bomb has been planted");
+        Bukkit.broadcastMessage(game.getTag() + ChatColor.YELLOW+"La bombe a été plantée");
         for(Player joueurs : Bukkit.getServer().getOnlinePlayers())
             joueurs.playSound(joueurs.getLocation(), Sound.ANVIL_LAND, 2, 1);
         ptber.addMoney(50);
@@ -174,5 +192,53 @@ public class Bomb {
         if(this.getLoc() != null){
             this.getLoc().getBlock().setType(Material.AIR);
         }
+    }
+
+    public void tryDefuse(PTBer ptber) {
+        int defuzetime;
+        Player player = Bukkit.getPlayer(ptber.getPlayerID());
+        Location loc = myPlugin.getCurrentGame().getActualRound().getBomb().getLoc();
+        if(player.getItemInHand().isSimilar(Tools.KIT.toItem())) {
+            defuzetime = 5*20;
+        }else
+            defuzetime = 10*20;
+        if(player.getLocation().distance(loc) >= 1.2) {
+            player.sendMessage(ChatColor.YELLOW+"Vous êtes trop loin pour désamorcer la bombe");
+        }else{
+            DefuzeTimer timer = new DefuzeTimer(myPlugin, ptber, defuzetime);
+            player.sendMessage(ChatColor.YELLOW+"Vous désamorcez la bombe");
+            player.getWorld().playSound(player.getLocation(), Sound.PISTON_RETRACT, 4, 1);
+            this.setDefuzing(true);
+            timer.runTaskTimer(myPlugin, 0, 1);
+        }
+    }
+
+    public void defuze(PTBer defuzer){
+        if(this.isPlanted()){
+            Game game = myPlugin.getCurrentGame();
+            game.getActualRound().winner(PTBteam.ANTITERRORISTE);
+            defuzer.addMoney(50);
+            this.setDefuze(true);
+            for (PTBer iterator : game.getPtbers().values()){
+                if(iterator.getTeam().equals(PTBteam.ANTITERRORISTE))
+                    iterator.addMoney(50);
+            }
+        }
+    }
+
+    public boolean isDefuzing() {
+        return isDefuzing;
+    }
+
+    public void setDefuzing(boolean defuzing) {
+        isDefuzing = defuzing;
+    }
+
+    public boolean isDefuze() {
+        return isDefuze;
+    }
+
+    public void setDefuze(boolean defuze) {
+        isDefuze = defuze;
     }
 }
