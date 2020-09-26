@@ -31,6 +31,13 @@ public class Shop implements GuiBuilder {
         inv.setItem(0, ShopItem.SWORD2.toShopItem());
         inv.setItem(1, ShopItem.SWORD3.toShopItem());
         inv.setItem(2, ShopItem.SWORD4.toShopItem());
+
+        inv.setItem(3, ShopItem.SMOKE.toShopItem());
+        /*
+        inv.setItem(4, ShopItem.FIRE.toShopItem());
+        inv.setItem(5, ShopItem.FLASH.toShopItem());
+        */
+
         inv.setItem(8, ShopItem.ARMOR.toShopItem());
 
         inv.setItem(9, ShopItem.BOW2.toShopItem());

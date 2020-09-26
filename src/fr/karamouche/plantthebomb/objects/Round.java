@@ -4,6 +4,7 @@ import fr.karamouche.plantthebomb.Main;
 import fr.karamouche.plantthebomb.enums.PTBteam;
 import fr.karamouche.plantthebomb.enums.Spawns;
 import fr.karamouche.plantthebomb.enums.Tools;
+import fr.karamouche.plantthebomb.objects.grenade.Grenade;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -12,11 +13,14 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.ArrayList;
+
 public class Round {
     private PTBteam winner;
     private final Game game;
     private final Main myPlugin;
     private final Bomb bomb;
+    private final ArrayList<Grenade> grenades = new ArrayList();
     private String timer;
     private BukkitRunnable runnable;
     private boolean canMoove;
@@ -136,6 +140,9 @@ public class Round {
                 if(i == 5) {
                     Bomb bomb = game.getActualRound().getBomb();
                     bomb.remove();
+                    for(Grenade grenade : game.getActualRound().getGrenades()){
+                        grenade.removeEffect();
+                    }
                     game.getRoundsList().add(game.getActualRound());
                     game.setActualRound(new Round(myPlugin, game));
                     this.cancel();
@@ -181,5 +188,9 @@ public class Round {
 
     public Bomb getBomb() {
         return bomb;
+    }
+
+    public ArrayList<Grenade> getGrenades() {
+        return grenades;
     }
 }

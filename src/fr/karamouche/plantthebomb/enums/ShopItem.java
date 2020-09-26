@@ -21,7 +21,11 @@ public enum ShopItem {
     BOW3(Material.BOW,ChatColor.GREEN+"Arc lvl.3", Enchantment.ARROW_DAMAGE, 2,  "bow", 3, 700, true),
     BOW4(Material.BOW,ChatColor.GREEN+"Arc lvl.4", Enchantment.ARROW_DAMAGE, 1, "bow", 4, 850, true),
 
-    ARROW(Material.ARROW, ChatColor.AQUA+"Flèches", null, 0, "arrow", 1, 100, true);
+    ARROW(Material.ARROW, ChatColor.AQUA+"Flèches", null, 0, "arrow", 1, 100, true),
+
+    SMOKE(Material.SNOW_BALL, ChatColor.BOLD+"Fumigène", null, 0, "grenade", 1, 0, true),
+    FIRE(Material.EGG, ChatColor.GOLD+"Cocktail Molotov", null, 0, "grenade", 1, 0, true),
+    FLASH(Material.EXP_BOTTLE, ChatColor.LIGHT_PURPLE+"Grenade aveuglante", null, 0, "grenade", 1, 0, true );
 
 
     private final Material mat;

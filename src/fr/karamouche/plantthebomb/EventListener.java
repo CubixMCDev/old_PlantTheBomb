@@ -5,12 +5,11 @@ import fr.karamouche.plantthebomb.enums.Tools;
 import fr.karamouche.plantthebomb.objects.Bomb;
 import fr.karamouche.plantthebomb.objects.Game;
 import fr.karamouche.plantthebomb.objects.PTBer;
+import fr.karamouche.plantthebomb.objects.grenade.Smoke;
+import net.minecraft.server.v1_8_R3.AchievementList;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -328,7 +327,8 @@ public class EventListener implements Listener {
 						bomb.tryDefuse(ptber);
 						event.setCancelled(true);
 					}
-				}
+				}else if(block.getType().equals(Material.NOTE_BLOCK) || block.getType().equals(Material.SPRUCE_DOOR) || block.getType().equals(Material.FURNACE) || block.getType().equals(Material.CHEST) || block.getType().equals(Material.WORKBENCH))
+					event.setCancelled(true);
 			}
 		}
 	}
@@ -360,9 +360,18 @@ public class EventListener implements Listener {
 
 	@EventHandler
 	public void onArrowHit(ProjectileHitEvent event){
-		if(event.getEntity() instanceof Arrow){
+		Entity entity = event.getEntity();
+		System.out.println(entity.getType());
+		System.out.println(entity);
+		if(entity instanceof Arrow) {
 			Arrow arrow = (Arrow) event.getEntity();
 			arrow.remove();
+		}else if(entity instanceof Snowball){
+			Smoke smoke = new Smoke(myPlugin, entity.getLocation());
+			smoke.setEffect();
+			myPlugin.getCurrentGame().getActualRound().getGrenades().add(smoke);
+		}else if(entity instanceof Egg){
+
 		}
 	}
 
@@ -401,18 +410,9 @@ public class EventListener implements Listener {
 			}
 		}
 	}
-	/*
+
 	@EventHandler
-	public void playeClick(PlayerInteractEvent event) {
-		if(event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-			Block block = event.getClickedBlock();
-			Player player = event.getPlayer();
-			if(FPTB.hasTeam(player) && FPTB.getTeam(player).equals(FPTB.antiterroriste) && !FPTB.isDefuzing) {
-				if((block.getType().equals(Material.REDSTONE_TORCH_OFF) || block.getType().equals(Material.REDSTONE_TORCH_ON)) && FPTB.isBombPlaced) {
-					FPTB.defuze(player, block);
-					event.setCancelled(true);
-				}
-			}
-		}
-	}*/
+	public void onMobSpawn(EntitySpawnEvent event){
+		event.setCancelled(true);
+	}
 }
