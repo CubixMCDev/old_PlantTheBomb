@@ -5,8 +5,8 @@ import fr.karamouche.plantthebomb.enums.Tools;
 import fr.karamouche.plantthebomb.objects.Bomb;
 import fr.karamouche.plantthebomb.objects.Game;
 import fr.karamouche.plantthebomb.objects.PTBer;
+import fr.karamouche.plantthebomb.objects.grenade.Molotov;
 import fr.karamouche.plantthebomb.objects.grenade.Smoke;
-import net.minecraft.server.v1_8_R3.AchievementList;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
@@ -329,6 +329,11 @@ public class EventListener implements Listener {
 					}
 				}else if(block.getType().equals(Material.NOTE_BLOCK) || block.getType().equals(Material.SPRUCE_DOOR) || block.getType().equals(Material.FURNACE) || block.getType().equals(Material.CHEST) || block.getType().equals(Material.WORKBENCH))
 					event.setCancelled(true);
+			}else if(event.getAction().equals(Action.LEFT_CLICK_BLOCK)){
+				Block block = event.getClickedBlock();
+				if(block.getType().equals(Material.FIRE)){
+					event.setCancelled(true);
+				}
 			}
 		}
 	}
@@ -361,8 +366,6 @@ public class EventListener implements Listener {
 	@EventHandler
 	public void onArrowHit(ProjectileHitEvent event){
 		Entity entity = event.getEntity();
-		System.out.println(entity.getType());
-		System.out.println(entity);
 		if(entity instanceof Arrow) {
 			Arrow arrow = (Arrow) event.getEntity();
 			arrow.remove();
@@ -371,7 +374,9 @@ public class EventListener implements Listener {
 			smoke.setEffect();
 			myPlugin.getCurrentGame().getActualRound().getGrenades().add(smoke);
 		}else if(entity instanceof Egg){
-
+			Molotov molo = new Molotov(myPlugin, entity.getLocation());
+			molo.setEffect();
+			myPlugin.getCurrentGame().getActualRound().getGrenades().add(molo);
 		}
 	}
 

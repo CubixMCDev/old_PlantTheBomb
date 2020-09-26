@@ -33,8 +33,8 @@ public class Shop implements GuiBuilder {
         inv.setItem(2, ShopItem.SWORD4.toShopItem());
 
         inv.setItem(3, ShopItem.SMOKE.toShopItem());
-        /*
         inv.setItem(4, ShopItem.FIRE.toShopItem());
+        /*
         inv.setItem(5, ShopItem.FLASH.toShopItem());
         */
 

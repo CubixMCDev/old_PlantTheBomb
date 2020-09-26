@@ -20,19 +20,14 @@ public class Smoke extends Grenade{
 
     public Smoke(Main myPlugin, Location loc) {
         super(myPlugin, loc);
-    }
-
-    @Override
-    public void setEffect() {
-        super.setEffect();
-        this.setLunch(true);
+        Smoke smoke = this;
         this.run = new BukkitRunnable() {
-
             int time = 0;
             @Override
             public void run() {
-                if(time == 15*10)
-                    this.cancel();
+                if(time == 15*10) {
+                    smoke.removeEffect();
+                }
                 loc.add(0, 1, 0);
                 for (double i = 0; i <= Math.PI; i += Math.PI / 30) {
                     double radius = 2.5*Math.sin(i);
@@ -55,6 +50,12 @@ public class Smoke extends Grenade{
                 time++;
             }
         };
+    }
+
+    @Override
+    public void setEffect() {
+        super.setEffect();
+        this.setLunch(true);
         this.run.runTaskTimer(myPlugin, 0, 2);
 
 
@@ -63,6 +64,7 @@ public class Smoke extends Grenade{
     @Override
     public void removeEffect() {
         this.run.cancel();
+        this.setLunch(false);
     }
 
 }
