@@ -61,7 +61,7 @@ public class PersonalScoreboard {
             objectiveSign.setLine(2, "Score : §c" + game.getScoreT() + " §r- §b" + game.getScoreA());
             if(game.getStatut().equals(Statut.INGAME) && !game.getActualRound().getBomb().isPlanted())
                 objectiveSign.setLine(3, "Round:" + ChatColor.GOLD + " " + game.getTimer());
-            else if(game.getStatut().equals(Statut.INGAME) && game.getActualRound().getBomb().isPlanted())
+            else if(game.getStatut().equals(Statut.INGAME) && game.getActualRound().getBomb().isPlanted() && !game.getActualRound().isFinish())
                 objectiveSign.setLine(3, "Bombe:" + ChatColor.GOLD + " " + game.getActualRound().getBomb().getTimer());
             else{
                 objectiveSign.setLine(3, "Victoire: " + game.getActualRound().getWinner().toString());

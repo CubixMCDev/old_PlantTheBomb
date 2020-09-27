@@ -256,7 +256,7 @@ public class PTBer {
 			default:
 				stuff.setItem(1, ShopItem.BOW1.toItem());
 		}
-		if(arrowAmount == 0)
+		if(arrowAmount < 10)
 			stuff.setItem(28, ShopItem.ARROW.getStack(10));
 		else if(arrowAmount >= 20)
 			stuff.setItem(28, ShopItem.ARROW.getStack(20));

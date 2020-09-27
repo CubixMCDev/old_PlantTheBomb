@@ -1,12 +1,12 @@
 package fr.karamouche.plantthebomb;
 
-import fr.karamouche.plantthebomb.enums.PTBteam;
-import fr.karamouche.plantthebomb.enums.Tools;
+import fr.karamouche.plantthebomb.enums.*;
 import fr.karamouche.plantthebomb.objects.Bomb;
 import fr.karamouche.plantthebomb.objects.Game;
 import fr.karamouche.plantthebomb.objects.PTBer;
 import fr.karamouche.plantthebomb.objects.grenade.Molotov;
 import fr.karamouche.plantthebomb.objects.grenade.Smoke;
+import net.minecraft.server.v1_8_R3.AchievementList;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
@@ -19,14 +19,13 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 
-import fr.karamouche.plantthebomb.enums.Spawns;
-import fr.karamouche.plantthebomb.enums.Statut;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class EventListener implements Listener {
 
@@ -220,6 +219,14 @@ public class EventListener implements Listener {
 					event.getItem().remove();
 				}else
 					event.setCancelled(true);
+			}else if (item.isSimilar(Tools.KIT.toItem())){
+				if(ptber.getTeam().equals(PTBteam.ANTITERRORISTE)){
+					event.setCancelled(true);
+					player.getInventory().setItem(8, Tools.KIT.toItem());
+					player.playSound(player.getLocation(), Sound.ITEM_PICKUP, 1, 1);
+					event.getItem().remove();
+				}else
+					event.setCancelled(true);
 			}
 		}else
 		    event.setCancelled(true);
@@ -229,8 +236,10 @@ public class EventListener implements Listener {
 	public void onPlaceBlock(BlockPlaceEvent event){
 		Game game = myPlugin.getCurrentGame();
 		if(game.getStatut().equals(Statut.LOBBY) || game.getStatut().equals(Statut.STARTING)){
-			if(!event.getPlayer().isOp() || !event.getPlayer().getGameMode().equals(GameMode.CREATIVE))
+			if(!event.getPlayer().isOp() || !event.getPlayer().getGameMode().equals(GameMode.CREATIVE)) {
 				event.setCancelled(true);
+			}
+
 		}else if(game.getStatut().equals(Statut.INGAME)){
 			Material blockType = event.getBlock().getType();
 			if(blockType.equals(Material.REDSTONE_TORCH_ON)) {
@@ -252,6 +261,28 @@ public class EventListener implements Listener {
 			    event.setCancelled(true);
 		}else
 			event.setCancelled(true);
+	}
+
+	@EventHandler
+	public void onItemLunch(ProjectileLaunchEvent event){
+		Game game = myPlugin.getCurrentGame();
+		EntityType type = event.getEntity().getType();
+		if(!game.getActualRound().isCanMoove() && event.getEntity().getShooter() instanceof Player) {
+			Player player = (Player) event.getEntity().getShooter();
+			if (type.equals(EntityType.EGG) ||
+			type.equals(EntityType.SNOWBALL) ||
+			type.equals(EntityType.THROWN_EXP_BOTTLE)) {
+				event.setCancelled(true);
+				player.sendMessage(game.getTag()+ChatColor.YELLOW+"Vous ne pouvez pas lancer une grenade tant que la partie n'a pas commencé !");
+				if(type.equals(EntityType.EGG))
+					player.getInventory().addItem(ShopItem.FIRE.toItem());
+				if(type.equals(EntityType.SNOWBALL))
+					player.getInventory().addItem(ShopItem.SMOKE.toItem());
+				if(type.equals(EntityType.THROWN_EXP_BOTTLE))
+					player.getInventory().addItem(ShopItem.FLASH.toItem());
+				player.updateInventory();
+			}
+		}
 	}
 
 	@EventHandler
@@ -285,8 +316,7 @@ public class EventListener implements Listener {
 				ItemStack itemInHand = player.getItemInHand();
 				if (itemInHand.isSimilar(Tools.TERROJOIN.toItem())) {
 					PTBer ptber;
-					event.setCancelled(true);
-					if (game.getTerro().getEntries().size() < 5) {
+					if (game.getTerro().getEntries().size() < game.getMaxPlayer()/2) {
 						if (game.getPtbers().containsKey(player.getUniqueId())) {
 							ptber = game.getPtbers().get(player.getUniqueId());
 							ptber.setTeam(PTBteam.TERRORISTE);
@@ -301,8 +331,7 @@ public class EventListener implements Listener {
 					}
 				} else if (itemInHand.isSimilar(Tools.ANTITERROJOIN.toItem())) {
 					PTBer ptber;
-					event.setCancelled(true);
-					if (game.getAntiterro().getEntries().size() < 5) {
+					if (game.getAntiterro().getEntries().size() < game.getMaxPlayer()/2) {
 						if (game.getPtbers().containsKey(player.getUniqueId())) {
 							ptber = game.getPtbers().get(player.getUniqueId());
 							ptber.setTeam(PTBteam.ANTITERRORISTE);
@@ -327,11 +356,16 @@ public class EventListener implements Listener {
 						bomb.tryDefuse(ptber);
 						event.setCancelled(true);
 					}
-				}else if(block.getType().equals(Material.NOTE_BLOCK) || block.getType().equals(Material.SPRUCE_DOOR) || block.getType().equals(Material.FURNACE) || block.getType().equals(Material.CHEST) || block.getType().equals(Material.WORKBENCH))
+				}else if(block.getType().equals(Material.NOTE_BLOCK) ||
+						block.getType().equals(Material.SPRUCE_DOOR) ||
+						block.getType().equals(Material.FURNACE) ||
+						block.getType().equals(Material.CHEST) ||
+						block.getType().equals(Material.WORKBENCH) ||
+						block.getType().equals(Material.CHEST))
 					event.setCancelled(true);
+
 			}else if(event.getAction().equals(Action.LEFT_CLICK_BLOCK)){
-				Block block = event.getClickedBlock();
-				if(block.getType().equals(Material.FIRE)){
+				if(player.getTargetBlock((Set<Material>) null, 5).getType().equals(Material.FIRE)){
 					event.setCancelled(true);
 				}
 			}
@@ -377,6 +411,14 @@ public class EventListener implements Listener {
 			Molotov molo = new Molotov(myPlugin, entity.getLocation());
 			molo.setEffect();
 			myPlugin.getCurrentGame().getActualRound().getGrenades().add(molo);
+		}else if(entity instanceof ThrownExpBottle){
+			ThrownExpBottle xpBottle = (ThrownExpBottle) entity;
+			for(World world : Bukkit.getWorlds()){
+				for(Entity worldEntity : world.getEntities()){
+					if(worldEntity instanceof ExperienceOrb)
+						worldEntity.remove();
+				}
+			}
 		}
 	}
 
@@ -418,6 +460,7 @@ public class EventListener implements Listener {
 
 	@EventHandler
 	public void onMobSpawn(EntitySpawnEvent event){
-		event.setCancelled(true);
+		if(!event.getEntityType().equals(EntityType.DROPPED_ITEM) && !event.getEntityType().equals(EntityType.ARROW))
+			event.setCancelled(true);
 	}
 }

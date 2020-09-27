@@ -41,7 +41,7 @@ public class Game {
 		this.setStatut(Statut.LOBBY);
 		this.ptbers = new HashMap<>();
 		this.offlineptbers = new HashMap<>();
-		this.tag = "§8[§eP§6T§cB§8] §r";
+		this.tag = "§eP§6T§cB§8 §6»";
 		this.myPlugin = main;
 		this.scoreA = 0;
 		this.scoreT = 0;

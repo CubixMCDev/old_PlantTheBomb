@@ -53,6 +53,7 @@ public class Round {
                 ptber.clearStuff();
             player.setGameMode(GameMode.SURVIVAL);
             ptber.addMoney(100);
+            player.setHealth(20);
         }
         this.bomb = new Bomb(myPlugin);
     }

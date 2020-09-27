@@ -3,6 +3,7 @@ package fr.karamouche.plantthebomb.objects;
 
 import fr.karamouche.plantthebomb.Main;
 import fr.karamouche.plantthebomb.enums.PTBteam;
+import fr.karamouche.plantthebomb.enums.Statut;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -46,7 +47,7 @@ public class BombExplosionTimer extends BukkitRunnable {
             }
         }
         else {
-            if(!bomb.isPlanted() || bomb.isDefuze())
+            if(!bomb.isPlanted() || bomb.isDefuze() || myPlugin.getCurrentGame().getStatut().equals(Statut.ENDGAME))
                 this.cancel();
             bombBlock.getWorld().playSound(bombLoc, Sound.NOTE_PLING, 2, 300);
             if(bombBlock.getType().equals(Material.REDSTONE_TORCH_ON))

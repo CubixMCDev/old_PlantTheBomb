@@ -23,8 +23,8 @@ public enum ShopItem {
 
     ARROW(Material.ARROW, ChatColor.AQUA+"Flèches", null, 0, "arrow", 1, 100, true),
 
-    SMOKE(Material.SNOW_BALL, ChatColor.BOLD+"Fumigène", null, 0, "grenade", 1, 0, true),
-    FIRE(Material.EGG, ChatColor.GOLD+"Cocktail Molotov", null, 0, "grenade", 1, 0, true),
+    SMOKE(Material.SNOW_BALL, ChatColor.BOLD+"Fumigène", null, 0, "grenade", 1, 300, true),
+    FIRE(Material.EGG, ChatColor.GOLD+"Cocktail Molotov", null, 0, "grenade", 1, 350, true),
     FLASH(Material.EXP_BOTTLE, ChatColor.LIGHT_PURPLE+"Grenade aveuglante", null, 0, "grenade", 1, 0, true );
 
 

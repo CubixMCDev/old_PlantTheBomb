@@ -1,7 +1,6 @@
 package fr.karamouche.plantthebomb.objects.grenade;
 
 import fr.karamouche.plantthebomb.Main;
-import javafx.scene.shape.Sphere;
 import net.minecraft.server.v1_8_R3.EnumParticle;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
