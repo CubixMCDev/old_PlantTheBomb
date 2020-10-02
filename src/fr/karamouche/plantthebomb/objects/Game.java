@@ -33,6 +33,7 @@ public class Game {
 	private final Team antiterroriste;
 	private Round actualRound;
 	private final ArrayList<Round> roundsList = new ArrayList();
+	private PTBteam winner;
 	
 	//CONSTRUCTEUR
 	public Game(Main main) {
@@ -50,6 +51,7 @@ public class Game {
 		this.terroriste = board.registerNewTeam("Terroriste");
 		this.antiterroriste = board.registerNewTeam("Antiterroriste");
 		this.actualRound = null;
+		winner = null;
 	}
 
 	public void giveLobbyItems(Player player) {
@@ -64,7 +66,6 @@ public class Game {
 		player.getInventory().setItem(3, terroJoin);
 		player.getInventory().setItem(5, antiJoin);
 
-		System.out.println("ON GIVE LES OBJETS A "+player.getName());
 	}
 
 	public void initializeTeams(){
@@ -199,30 +200,37 @@ public class Game {
 		this.actualRound = new Round(myPlugin, this);
 	}
 
+	public PTBteam getGameWinner(){
+		return this.winner;
+	}
+
 	public void endgame(PTBteam winnerTeam){
 		this.setStatut(Statut.ENDGAME);
+		Team winners;
 		if (winnerTeam.equals(PTBteam.TERRORISTE)) {
-			Team winners = this.getTerro();
+			winners = this.getTerro();
 			Bukkit.getServer().broadcastMessage(this.getTag() + ChatColor.BOLD + "Victoire des " + winners.getPrefix() + "terroristes !");
 		}else {
-			Team winners = this.getAntiterro();
+			winners = this.getAntiterro();
 			Bukkit.getServer().broadcastMessage(this.getTag()+ChatColor.BOLD+"Victoire des "+winners.getPrefix()+"antiterroristes !");
 		}
-			for(PTBer ptber : this.getPtbers().values()) {
-				Player player = Bukkit.getPlayer(ptber.getPlayerID());
-				if(ptber.getTeam().equals(winnerTeam)) {
-					player.setAllowFlight(true);
-					if(!player.getGameMode().equals(GameMode.SPECTATOR)) {
-						Firework firework = player.getWorld().spawn(player.getLocation(), Firework.class);
-						FireworkMeta data = firework.getFireworkMeta();
-						data.addEffects(FireworkEffect.builder().withColor(Color.RED).with(FireworkEffect.Type.BALL_LARGE).withFlicker().build());
-						data.setPower(1);
-						firework.setFireworkMeta(data);
-					}
+		this.winner = winnerTeam;
+		for(PTBer ptber : this.getPtbers().values()) {
+			Player player = Bukkit.getPlayer(ptber.getPlayerID());
+			if(ptber.getTeam().equals(winnerTeam)) {
+				player.setAllowFlight(true);
+				if(!player.getGameMode().equals(GameMode.SPECTATOR)) {
+					Firework firework = player.getWorld().spawn(player.getLocation(), Firework.class);
+					FireworkMeta data = firework.getFireworkMeta();
+					data.addEffects(FireworkEffect.builder().withColor(Color.RED).with(FireworkEffect.Type.BALL_LARGE).withFlicker().build());
+					data.setPower(1);
+					firework.setFireworkMeta(data);
 				}
-				else if(!player.getGameMode().equals(GameMode.SPECTATOR))
-					ptber.kill(null);
 			}
+			else if(!player.getGameMode().equals(GameMode.SPECTATOR))
+				ptber.kill(null);
+		}
+		myPlugin.getStatManager().gameHasEnd();
 	}
 
 	public int getNbPlayers() {

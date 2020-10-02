@@ -445,7 +445,7 @@ public class EventListener implements Listener {
 				for(PTBer ptbers : game.getPtbers().values()){
 					if(ptbers.getTeam().equals(ptber.getTeam())){
 						Player players = Bukkit.getPlayer(ptbers.getPlayerID());
-						players.sendMessage(player.getName()+" -> "+ptber.getTeam().toString()+ ChatColor.WHITE+": "+message);
+						players.sendMessage(ptber.getTeam().getTag()+"[TeamChat] "+player.getName()+" -> "+ ChatColor.WHITE+": "+message);
 					}
 				}
 			}

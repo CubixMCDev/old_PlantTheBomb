@@ -36,12 +36,12 @@ public class PersonalScoreboard {
         objectiveSign.setLine(1, "§1");
 		if (game.getStatut().equals(Statut.LOBBY) ||game.getStatut().equals(Statut.STARTING)){
             objectiveSign.setLine(2, "§e§lCoins");
-            objectiveSign.setLine(3, "§7" + "0" /*main.getApi().getEcoManager().getBalanceCoins(player)*/);
+            objectiveSign.setLine(3, "§7" + "0" /*myPlugin.getApi().getEcoManager().getBalanceCoins(player)*/);
             objectiveSign.setLine(4, "§2");
             objectiveSign.setLine(5, "§e§lVos Stats");
-            objectiveSign.setLine(6, "§3Parties jouées: §b" +" 0" /*main.getPlayersManager().getProfile(player).getGlobalGamesPlayed()*/);
-            objectiveSign.setLine(7, "§3Victoires: §b" +" 0" /*main.getPlayersManager().getProfile(player).getGlobalWins()*/);
-            objectiveSign.setLine(8, "§3Kills: §b" +" 0" /*main.getPlayersManager().getProfile(player).getGlobalKills()*/);
+            objectiveSign.setLine(6, "§3Parties jouées: §b" + myPlugin.getStatManager().getGamePlayed(uuid));
+            objectiveSign.setLine(7, "§3Victoires: §b" + myPlugin.getStatManager().getGamePlayed(uuid));
+            objectiveSign.setLine(8, "§3Kills: §b" + + myPlugin.getStatManager().getGamePlayed(uuid));
             objectiveSign.setLine(9, "§3");
             objectiveSign.setLine(10, "§c§lDémarrage:");
 

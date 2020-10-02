@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import eu.cubixmc.com.CubixAPI;
 import fr.karamouche.plantthebomb.commands.ForcestartCommand;
 import fr.karamouche.plantthebomb.gui.GuiBuilder;
 import fr.karamouche.plantthebomb.gui.GuiManager;
@@ -28,6 +29,7 @@ public class Main extends JavaPlugin {
 	private GuiManager guiManager;
 	private Map<Class<? extends GuiBuilder>, GuiBuilder> registeredMenus;
     private Game game;
+    private StatManager statManager;
 	
 	@Override
 	public void onEnable() {
@@ -42,6 +44,8 @@ public class Main extends JavaPlugin {
 	     getCommand("forcestart").setExecutor(new ForcestartCommand(this));
 	     game = new Game(this);
 	     game.initializeTeams();
+
+	     statManager = new StatManager(this);
 	}
 	
 	@Override
@@ -65,10 +69,16 @@ public class Main extends JavaPlugin {
 	public GuiManager getGuiManager() {
 		return guiManager;
 	}
+
+	public CubixAPI getApi() {
+		return (CubixAPI) Bukkit.getServer().getPluginManager().getPlugin("CubixAPI");
+	}
 	
 	public Game getCurrentGame() {
 		return this.game;
 	}
+
+	public StatManager getStatManager(){return statManager;}
 	
     public ScoreboardManager getScoreboardManager() {
         return sc;

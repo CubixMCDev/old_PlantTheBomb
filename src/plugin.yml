@@ -5,4 +5,4 @@ main: fr.karamouche.plantthebomb.Main
 commands:
   forcestart:
     description: start the game
-    permission: punch.start
+    permission: ptb.start
